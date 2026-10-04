@@ -5,17 +5,12 @@ import os
 
 class CardVision:
     def __init__(self):
-        # This dictionary serves as the bot's "Memory"
-        # Format: { "name_of_thing": image_data_matrix }
         self.templates = {}
 
     def load_template(self, name, image_path, evo_hero):
         """
         Loads an image file (like 'hog_rider.png') into memory.
         """
-        # cv2.IMREAD_COLOR loads it in BGR format (Standard for OpenCV)
-        # cv2.IMREAD_UNCHANGED would include transparency (alpha), which we usually strip for matching
-        
         filename = f"Card_{name}"
 
         if evo_hero == 1:
@@ -37,7 +32,6 @@ class CardVision:
             self.templates[name].append(img)
             print(f"- Learned pattern: {name}, {full_path}")
     
-    
 
     def find(self, haystack_img, template_name, threshold, debug_mode=False):
         """
@@ -56,27 +50,20 @@ class CardVision:
                 width = int(needle_img.shape[1] * scale)
                 height = int(needle_img.shape[0] * scale)
                 resized_needle = cv2.resize(needle_img, (width, height))
-
-                # 1. Run the matching algorithm
-                # TM_CCOEFF_NORMED is the best all-rounder. 1.0 = Perfect Match, 0.0 = No Match.
-                # Add this inside the 'for needle_img in self.templates[template_name]:' loop
+                
                 template = cv2.cvtColor(resized_needle, cv2.COLOR_BGR2GRAY)
                 result = cv2.matchTemplate(frame, template, cv2.TM_CCOEFF_NORMED)
 
-                # 2. Filter out weak matches
                 locations = np.where(result >= threshold)
                 locations = list(zip(*locations[::-1]))
-
-                # 3. Consolidate overlapping matches (Clean up the noise)
+                
                 rectangles = []
                 for loc in locations:
                     rect = [int(loc[0]), int(loc[1]), width, height]
-                    # Add twice to allow grouping logic later (OpenCV requirement for groupRectangles)
+
                     rectangles.append(rect)
                     rectangles.append(rect)
 
-                # groupRectangles merges boxes that are right on top of each other
-                # eps=0.5 (grouping threshold), groupThreshold=1 (min number of overlaps)
                 rectangles, weights = cv2.groupRectangles(rectangles, groupThreshold=1, eps=0.5)
 
                 for (x, y, w, h) in rectangles:

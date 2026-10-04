@@ -30,9 +30,7 @@ arena_width = 18
 arena_height = 30
 phones = {
     "riley": "SM-A536W",
-    # "riley": "SM-S936W",
     "chris": "SM-S936W"
-    # "chris": "Winter 2026 Calendar"
     }
 decks = {
     "riley": ["Fireball", "Bats", "SkeletonArmy", "Valkyrie", "Tesla", 
@@ -218,7 +216,8 @@ if __name__ == "__main__":
     bot_logic = PlayAutomation(decks[user])
     score_tracker = GameState(json_name, json_location, db_json_name, 
                               f"robot\\{db_json_name}", screen_mapper)
-    play_strategy = PlayStrategy(tuple(raw_json["match_time"]))
+    play_strategy = PlayStrategy(tuple(raw_json["match_time"]) 
+                                 if raw_json and "match_time" in raw_json else ())
 
     arena_detector = ArenaVision("runs\\detect\\train7\\weights\\best.pt")
     names_map = arena_detector.model.names
@@ -414,7 +413,7 @@ if __name__ == "__main__":
                     match_time = time.time() - time_diff
                 except NameError:
                     print("Match time not calibrated yet.")
-            both_times.append(tuple(time.time(), match_time))
+            both_times.append((time.time(), match_time))
             
             if len(both_times) == 100: 
                 time_diff = time_calibration(both_times)
