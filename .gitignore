@@ -2,3 +2,7 @@
 .env
 runs
 .pt
+assets/
+runs/
+Chris_S25.json
+scrcpy*/
